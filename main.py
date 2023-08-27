@@ -16,5 +16,23 @@ class IP(Structure):#declaring new class which inherits from "structures" in cty
         ('protocol_num', c_ubyte)#indicates the number of the protocol used
         ('sum', c_ushort),#header checksum, used for error checking the header
         ('src', c_uint32),#represents the source ip address(where the packet is coming from)
-        ('dst', c_uint32)#represents the dst ip address(where the packet is going)
+        ('dst', c_uint32)#represents the destination ip address(where the packet is going)
     ]
+
+    #method for creating new instance of class
+    def __new__(self, socket_buffer=None):
+        return self.from_buffer_copy(socket_buffer)#returning a copy of the binary data, ensuring integrity of the binary data
+    
+    #method to initialize the instance of the class
+    def __init__(self, socket_buffer=None):
+        self.protocol_map={1: "ICMP", 6: "TCP", 17:"UDP"}#dictionary to map the protocols and their numbers
+        #translating source IP address from binary to standard dotted-quad string representation
+        self.src_address=socket.inet_ntoa(struct.pack("<L", self.src))
+        #same functionality as above line, except its used for destination address
+        self.dst_address=socket.inet_ntoa(struct.pack("<L", self.dst))
+        try:
+            #fetching the protocols string representation
+            self.protocol_map[self.protocol_num]
+        except:
+            #if protocol doesn't exist in above dictionary, it fetches the protocol number
+            self.protocol=str(self.protocol_num)
